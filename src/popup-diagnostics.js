@@ -3,24 +3,24 @@
 
 class PopupDiagnostics {
   constructor(diagnosticsModule) {
-    this.diagnostics = diagnosticsModule;
-    this.container = null;
-    this.isVisible = false;
-    this.autoRefresh = null;
-    this.init();
+    this.diagnostics = diagnosticsModule
+    this.container = null
+    this.isVisible = false
+    this.autoRefresh = null
+    this.init()
   }
 
   init() {
-    this.createUI();
-    this.bindEvents();
-    this.startAutoRefresh();
+    this.createUI()
+    this.bindEvents()
+    this.startAutoRefresh()
   }
 
   createUI() {
     // Create diagnostics panel in popup
-    this.container = document.createElement('div');
-    this.container.id = 'warp-diagnostics-panel';
-    this.container.className = 'diagnostics-panel';
+    this.container = document.createElement('div')
+    this.container.id = 'warp-diagnostics-panel'
+    this.container.className = 'diagnostics-panel'
     this.container.style.cssText = `
       position: fixed;
       top: 10px;
@@ -34,7 +34,7 @@ class PopupDiagnostics {
       display: none;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       overflow: hidden;
-    `;
+    `
 
     this.container.innerHTML = `
       <div class="diagnostics-header" style="
@@ -235,162 +235,162 @@ class PopupDiagnostics {
       ">
         Auto-refresh every 30s • <span id="data-timestamp">--</span>
       </div>
-    `;
+    `
 
-    document.body.appendChild(this.container);
+    document.body.appendChild(this.container)
   }
 
   bindEvents() {
     // Close button
     document.getElementById('warp-diagnostics-close').addEventListener('click', () => {
-      this.hide();
-    });
+      this.hide()
+    })
 
     // Tab switching
-    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabBtns = document.querySelectorAll('.tab-btn')
     tabBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        this.switchTab(e.target.dataset.tab);
-      });
-    });
+      btn.addEventListener('click', e => {
+        this.switchTab(e.target.dataset.tab)
+      })
+    })
 
     // Action buttons
-    this.bindActionButtons();
+    this.bindActionButtons()
 
     // Hover effects
-    const actionBtns = document.querySelectorAll('.action-btn');
+    const actionBtns = document.querySelectorAll('.action-btn')
     actionBtns.forEach(btn => {
       btn.addEventListener('mouseenter', () => {
-        btn.style.background = 'rgba(255,255,255,0.3)';
-      });
+        btn.style.background = 'rgba(255,255,255,0.3)'
+      })
       btn.addEventListener('mouseleave', () => {
-        btn.style.background = 'rgba(255,255,255,0.2)';
-      });
-    });
+        btn.style.background = 'rgba(255,255,255,0.2)'
+      })
+    })
 
-    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabButtons = document.querySelectorAll('.tab-btn')
     tabButtons.forEach(btn => {
       btn.addEventListener('mouseenter', () => {
         if (!btn.classList.contains('active')) {
-          btn.style.borderBottomColor = 'rgba(255,255,255,0.5)';
+          btn.style.borderBottomColor = 'rgba(255,255,255,0.5)'
         }
-      });
+      })
       btn.addEventListener('mouseleave', () => {
         if (!btn.classList.contains('active')) {
-          btn.style.borderBottomColor = 'transparent';
+          btn.style.borderBottomColor = 'transparent'
         }
-      });
-    });
+      })
+    })
   }
 
   bindActionButtons() {
     document.getElementById('run-health-check').addEventListener('click', async () => {
-      this.showLoading('Running health check...');
+      this.showLoading('Running health check...')
       try {
-        await this.diagnostics.runHealthCheck();
-        this.updateDisplay();
-        this.showNotification('Health check completed', 'success');
+        await this.diagnostics.runHealthCheck()
+        this.updateDisplay()
+        this.showNotification('Health check completed', 'success')
       } catch (error) {
-        this.showNotification('Health check failed: ' + error.message, 'error');
+        this.showNotification('Health check failed: ' + error.message, 'error')
       }
-    });
+    })
 
     document.getElementById('clear-storage').addEventListener('click', async () => {
       if (confirm('This will clear all stored data. Continue?')) {
-        this.showLoading('Clearing storage...');
+        this.showLoading('Clearing storage...')
         try {
-          await this.diagnostics.clearStorage();
-          this.showNotification('Storage cleared successfully', 'success');
+          await this.diagnostics.clearStorage()
+          this.showNotification('Storage cleared successfully', 'success')
         } catch (error) {
-          this.showNotification('Failed to clear storage: ' + error.message, 'error');
+          this.showNotification('Failed to clear storage: ' + error.message, 'error')
         }
       }
-    });
+    })
 
     document.getElementById('reset-settings').addEventListener('click', async () => {
       if (confirm('This will reset all settings to defaults. Continue?')) {
-        this.showLoading('Resetting settings...');
+        this.showLoading('Resetting settings...')
         try {
-          await this.diagnostics.resetSettings();
-          this.showNotification('Settings reset successfully', 'success');
+          await this.diagnostics.resetSettings()
+          this.showNotification('Settings reset successfully', 'success')
         } catch (error) {
-          this.showNotification('Failed to reset settings: ' + error.message, 'error');
+          this.showNotification('Failed to reset settings: ' + error.message, 'error')
         }
       }
-    });
+    })
 
     document.getElementById('export-logs').addEventListener('click', () => {
       try {
-        const logs = this.diagnostics.exportLogs();
-        this.downloadFile('warp-diagnostics-logs.json', JSON.stringify(logs, null, 2));
-        this.showNotification('Logs exported successfully', 'success');
+        const logs = this.diagnostics.exportLogs()
+        this.downloadFile('warp-diagnostics-logs.json', JSON.stringify(logs, null, 2))
+        this.showNotification('Logs exported successfully', 'success')
       } catch (error) {
-        this.showNotification('Failed to export logs: ' + error.message, 'error');
+        this.showNotification('Failed to export logs: ' + error.message, 'error')
       }
-    });
+    })
 
     document.getElementById('generate-report').addEventListener('click', async () => {
-      this.showLoading('Generating report...');
+      this.showLoading('Generating report...')
       try {
-        const report = await this.diagnostics.generateReport();
-        this.downloadFile('warp-diagnostics-report.html', this.generateHTMLReport(report));
-        this.showNotification('Report generated successfully', 'success');
+        const report = await this.diagnostics.generateReport()
+        this.downloadFile('warp-diagnostics-report.html', this.generateHTMLReport(report))
+        this.showNotification('Report generated successfully', 'success')
       } catch (error) {
-        this.showNotification('Failed to generate report: ' + error.message, 'error');
+        this.showNotification('Failed to generate report: ' + error.message, 'error')
       }
-    });
+    })
   }
 
   switchTab(tabId) {
     // Update tab buttons
     document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.classList.remove('active');
-      btn.style.borderBottomColor = 'transparent';
-    });
-    
-    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-    document.querySelector(`[data-tab="${tabId}"]`).style.borderBottomColor = 'white';
+      btn.classList.remove('active')
+      btn.style.borderBottomColor = 'transparent'
+    })
+
+    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active')
+    document.querySelector(`[data-tab="${tabId}"]`).style.borderBottomColor = 'white'
 
     // Update tab content
     document.querySelectorAll('.tab-pane').forEach(pane => {
-      pane.style.display = 'none';
-    });
-    
-    document.getElementById(`tab-${tabId}`).style.display = 'block';
+      pane.style.display = 'none'
+    })
+
+    document.getElementById(`tab-${tabId}`).style.display = 'block'
 
     // Load specific tab data
-    this.loadTabData(tabId);
+    this.loadTabData(tabId)
   }
 
   async loadTabData(tabId) {
     switch (tabId) {
       case 'overview':
-        this.updateOverview();
-        break;
+        this.updateOverview()
+        break
       case 'errors':
-        this.updateErrors();
-        break;
+        this.updateErrors()
+        break
       case 'performance':
-        this.updatePerformance();
-        break;
+        this.updatePerformance()
+        break
       case 'actions':
         // Actions are static, no need to update
-        break;
+        break
     }
   }
 
   updateOverview() {
-    const status = this.diagnostics.getSystemStatus();
-    
+    const status = this.diagnostics.getSystemStatus()
+
     // Update component status
-    const componentList = document.getElementById('component-list');
-    componentList.innerHTML = '';
-    
+    const componentList = document.getElementById('component-list')
+    componentList.innerHTML = ''
+
     Object.entries(status.components).forEach(([name, info]) => {
-      const statusColor = info.healthy ? '#4CAF50' : '#f44336';
-      const statusIcon = info.healthy ? '✓' : '✗';
-      
-      const component = document.createElement('div');
+      const statusColor = info.healthy ? '#4CAF50' : '#f44336'
+      const statusIcon = info.healthy ? '✓' : '✗'
+
+      const component = document.createElement('div')
       component.style.cssText = `
         display: flex;
         justify-content: between;
@@ -400,33 +400,36 @@ class PopupDiagnostics {
         background: rgba(255,255,255,0.1);
         border-radius: 4px;
         font-size: 12px;
-      `;
-      
+      `
+
       component.innerHTML = `
         <span style="display: flex; align-items: center;">
           <span style="color: ${statusColor}; margin-right: 8px; font-weight: bold;">${statusIcon}</span>
           ${name}
         </span>
         <span style="opacity: 0.7;">${info.lastCheck || 'Never'}</span>
-      `;
-      
-      componentList.appendChild(component);
-    });
+      `
+
+      componentList.appendChild(component)
+    })
 
     // Update recent activity
-    this.updateRecentActivity();
+    this.updateRecentActivity()
   }
 
   updateRecentActivity() {
-    const activities = this.diagnostics.getRecentActivities(10);
-    const activityList = document.getElementById('activity-list');
-    
+    const activities = this.diagnostics.getRecentActivities(10)
+    const activityList = document.getElementById('activity-list')
+
     if (activities.length === 0) {
-      activityList.innerHTML = '<div style="opacity: 0.6; text-align: center; padding: 10px;">No recent activity</div>';
-      return;
+      activityList.innerHTML =
+        '<div style="opacity: 0.6; text-align: center; padding: 10px;">No recent activity</div>'
+      return
     }
 
-    activityList.innerHTML = activities.map(activity => `
+    activityList.innerHTML = activities
+      .map(
+        activity => `
       <div style="margin: 4px 0; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
         <div style="display: flex; justify-content: between; align-items: center;">
           <span>${activity.action}</span>
@@ -434,19 +437,24 @@ class PopupDiagnostics {
         </div>
         ${activity.details ? `<div style="opacity: 0.7; font-size: 10px; margin-top: 2px;">${activity.details}</div>` : ''}
       </div>
-    `).join('');
+    `
+      )
+      .join('')
   }
 
   updateErrors() {
-    const errors = this.diagnostics.getErrors();
-    const errorList = document.getElementById('error-list');
-    
+    const errors = this.diagnostics.getErrors()
+    const errorList = document.getElementById('error-list')
+
     if (errors.length === 0) {
-      errorList.innerHTML = '<div style="text-align: center; opacity: 0.6; padding: 20px;">🎉 No errors found!</div>';
-      return;
+      errorList.innerHTML =
+        '<div style="text-align: center; opacity: 0.6; padding: 20px;">🎉 No errors found!</div>'
+      return
     }
 
-    errorList.innerHTML = errors.map(error => `
+    errorList.innerHTML = errors
+      .map(
+        error => `
       <div style="
         background: rgba(244, 67, 54, 0.2);
         border: 1px solid rgba(244, 67, 54, 0.3);
@@ -459,10 +467,14 @@ class PopupDiagnostics {
           <span style="opacity: 0.7; font-size: 11px;">${this.formatTime(error.timestamp)}</span>
         </div>
         <div style="font-size: 12px; margin-bottom: 6px; word-break: break-word;">${error.message}</div>
-        ${error.stack ? `<details style="margin-top: 8px;">
+        ${
+          error.stack
+            ? `<details style="margin-top: 8px;">
           <summary style="cursor: pointer; font-size: 11px; opacity: 0.8;">Stack trace</summary>
           <pre style="font-size: 10px; margin: 4px 0 0 0; opacity: 0.7; white-space: pre-wrap;">${error.stack}</pre>
-        </details>` : ''}
+        </details>`
+            : ''
+        }
         <div style="margin-top: 8px;">
           <button onclick="navigator.clipboard.writeText('${JSON.stringify(error).replace(/'/g, "\\'")}').then(() => this.textContent = 'Copied!')" 
                   style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;">
@@ -470,13 +482,15 @@ class PopupDiagnostics {
           </button>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('')
   }
 
   updatePerformance() {
-    const metrics = this.diagnostics.getPerformanceMetrics();
-    const performanceContainer = document.getElementById('performance-metrics');
-    
+    const metrics = this.diagnostics.getPerformanceMetrics()
+    const performanceContainer = document.getElementById('performance-metrics')
+
     performanceContainer.innerHTML = `
       <div style="display: grid; gap: 12px;">
         <div class="metric-card" style="
@@ -515,14 +529,18 @@ class PopupDiagnostics {
         ">
           <h5 style="margin: 0 0 10px 0; font-size: 13px; color: rgba(255,255,255,0.9);">Response Times</h5>
           <div style="display: grid; gap: 6px;">
-            ${Object.entries(metrics.responseTimes).map(([operation, time]) => `
+            ${Object.entries(metrics.responseTimes)
+              .map(
+                ([operation, time]) => `
               <div style="display: flex; justify-content: between; align-items: center;">
                 <span style="font-size: 12px;">${operation}:</span>
                 <span style="font-weight: bold; color: ${time < 100 ? '#4CAF50' : time < 500 ? '#FFC107' : '#f44336'};">
                   ${time}ms
                 </span>
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
         </div>
 
@@ -548,88 +566,92 @@ class PopupDiagnostics {
           </div>
         </div>
       </div>
-    `;
+    `
   }
 
   show() {
-    this.isVisible = true;
-    this.container.style.display = 'block';
-    this.updateDisplay();
-    
+    this.isVisible = true
+    this.container.style.display = 'block'
+    this.updateDisplay()
+
     // Animate in
-    this.container.style.transform = 'translateY(-20px)';
-    this.container.style.opacity = '0';
+    this.container.style.transform = 'translateY(-20px)'
+    this.container.style.opacity = '0'
     setTimeout(() => {
-      this.container.style.transition = 'all 0.3s ease';
-      this.container.style.transform = 'translateY(0)';
-      this.container.style.opacity = '1';
-    }, 10);
+      this.container.style.transition = 'all 0.3s ease'
+      this.container.style.transform = 'translateY(0)'
+      this.container.style.opacity = '1'
+    }, 10)
   }
 
   hide() {
-    this.isVisible = false;
-    this.container.style.transition = 'all 0.3s ease';
-    this.container.style.transform = 'translateY(-20px)';
-    this.container.style.opacity = '0';
-    
+    this.isVisible = false
+    this.container.style.transition = 'all 0.3s ease'
+    this.container.style.transform = 'translateY(-20px)'
+    this.container.style.opacity = '0'
+
     setTimeout(() => {
-      this.container.style.display = 'none';
-      this.container.style.transition = '';
-    }, 300);
+      this.container.style.display = 'none'
+      this.container.style.transition = ''
+    }, 300)
   }
 
   toggle() {
     if (this.isVisible) {
-      this.hide();
+      this.hide()
     } else {
-      this.show();
+      this.show()
     }
   }
 
   updateDisplay() {
-    const status = this.diagnostics.getSystemStatus();
-    
+    const status = this.diagnostics.getSystemStatus()
+
     // Update health indicator
-    const healthIndicator = document.getElementById('health-indicator');
-    const healthText = document.getElementById('health-text');
-    
+    const healthIndicator = document.getElementById('health-indicator')
+    const healthText = document.getElementById('health-text')
+
     if (status.overall.healthy) {
-      healthIndicator.style.background = '#4CAF50';
-      healthText.textContent = 'System Healthy';
+      healthIndicator.style.background = '#4CAF50'
+      healthText.textContent = 'System Healthy'
     } else {
-      healthIndicator.style.background = '#f44336';
-      healthText.textContent = 'Issues Detected';
+      healthIndicator.style.background = '#f44336'
+      healthText.textContent = 'Issues Detected'
     }
-    
+
     // Update timestamps
-    document.getElementById('last-check-time').textContent = this.formatTime(status.overall.lastCheck);
-    document.getElementById('uptime').textContent = this.formatDuration(Date.now() - status.overall.startTime);
-    document.getElementById('data-timestamp').textContent = this.formatTime(Date.now());
-    
+    document.getElementById('last-check-time').textContent = this.formatTime(
+      status.overall.lastCheck
+    )
+    document.getElementById('uptime').textContent = this.formatDuration(
+      Date.now() - status.overall.startTime
+    )
+    document.getElementById('data-timestamp').textContent = this.formatTime(Date.now())
+
     // Update current tab
-    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab || 'overview';
-    this.loadTabData(activeTab);
+    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab || 'overview'
+    this.loadTabData(activeTab)
   }
 
   startAutoRefresh() {
     this.autoRefresh = setInterval(() => {
       if (this.isVisible) {
-        this.updateDisplay();
+        this.updateDisplay()
       }
-    }, 30000); // 30 seconds
+    }, 30000) // 30 seconds
   }
 
   stopAutoRefresh() {
     if (this.autoRefresh) {
-      clearInterval(this.autoRefresh);
-      this.autoRefresh = null;
+      clearInterval(this.autoRefresh)
+      this.autoRefresh = null
     }
   }
 
   showLoading(message) {
     // Show loading overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'diagnostics-loading';
+    const overlay = document.createElement('div')
+    overlay.id = 'diagnostics-loading'
     overlay.style.cssText = `
       position: absolute;
       top: 0;
@@ -643,7 +665,7 @@ class PopupDiagnostics {
       color: white;
       font-size: 14px;
       backdrop-filter: blur(4px);
-    `;
+    `
     overlay.innerHTML = `
       <div style="text-align: center;">
         <div style="
@@ -663,19 +685,19 @@ class PopupDiagnostics {
           100% { transform: rotate(360deg); }
         }
       </style>
-    `;
-    
-    this.container.appendChild(overlay);
-    
+    `
+
+    this.container.appendChild(overlay)
+
     // Remove after 5 seconds max
     setTimeout(() => {
-      const loader = document.getElementById('diagnostics-loading');
-      if (loader) loader.remove();
-    }, 5000);
+      const loader = document.getElementById('diagnostics-loading')
+      if (loader) loader.remove()
+    }, 5000)
   }
 
   showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
+    const notification = document.createElement('div')
     notification.style.cssText = `
       position: fixed;
       top: 20px;
@@ -689,27 +711,27 @@ class PopupDiagnostics {
       font-size: 13px;
       font-weight: 500;
       animation: slideIn 0.3s ease;
-    `;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
+    `
+    notification.textContent = message
+
+    document.body.appendChild(notification)
+
     setTimeout(() => {
-      notification.style.animation = 'slideOut 0.3s ease forwards';
-      setTimeout(() => notification.remove(), 300);
-    }, 3000);
+      notification.style.animation = 'slideOut 0.3s ease forwards'
+      setTimeout(() => notification.remove(), 300)
+    }, 3000)
   }
 
   downloadFile(filename, content) {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   generateHTMLReport(reportData) {
@@ -766,7 +788,9 @@ class PopupDiagnostics {
               <tr><th>Component</th><th>Status</th><th>Last Check</th><th>Details</th></tr>
             </thead>
             <tbody>
-              ${Object.entries(reportData.components).map(([name, info]) => `
+              ${Object.entries(reportData.components)
+                .map(
+                  ([name, info]) => `
                 <tr>
                   <td>${name}</td>
                   <td class="${info.healthy ? 'status-good' : 'status-error'}">
@@ -775,7 +799,9 @@ class PopupDiagnostics {
                   <td>${info.lastCheck ? new Date(info.lastCheck).toLocaleString() : 'Never'}</td>
                   <td>${info.details || '-'}</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join('')}
             </tbody>
           </table>
         </div>
@@ -798,17 +824,25 @@ class PopupDiagnostics {
           </div>
         </div>
 
-        ${reportData.errors.length > 0 ? `
+        ${
+          reportData.errors.length > 0
+            ? `
         <div class="section">
           <h3>Recent Errors (${reportData.errors.length})</h3>
-          ${reportData.errors.map(error => `
+          ${reportData.errors
+            .map(
+              error => `
             <div class="error-item">
               <strong>${error.type}</strong> - ${new Date(error.timestamp).toLocaleString()}<br>
               <em>${error.message}</em>
             </div>
-          `).join('')}
+          `
+            )
+            .join('')}
         </div>
-        ` : '<div class="section"><h3>✅ No Recent Errors</h3></div>'}
+        `
+            : '<div class="section"><h3>✅ No Recent Errors</h3></div>'
+        }
 
         <div class="section">
           <h3>Recommendations</h3>
@@ -819,40 +853,40 @@ class PopupDiagnostics {
       </div>
     </body>
     </html>
-    `;
+    `
   }
 
   formatTime(timestamp) {
-    return new Date(timestamp).toLocaleTimeString();
+    return new Date(timestamp).toLocaleTimeString()
   }
 
   formatDuration(ms) {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
+    const seconds = Math.floor(ms / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+    const days = Math.floor(hours / 24)
 
-    if (days > 0) return `${days}d ${hours % 24}h`;
-    if (hours > 0) return `${hours}h ${minutes % 60}m`;
-    if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
-    return `${seconds}s`;
+    if (days > 0) return `${days}d ${hours % 24}h`
+    if (hours > 0) return `${hours}h ${minutes % 60}m`
+    if (minutes > 0) return `${minutes}m ${seconds % 60}s`
+    return `${seconds}s`
   }
 
   formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
   destroy() {
-    this.stopAutoRefresh();
+    this.stopAutoRefresh()
     if (this.container && this.container.parentNode) {
-      this.container.parentNode.removeChild(this.container);
+      this.container.parentNode.removeChild(this.container)
     }
   }
 }
 
 // Export for use in popup
-window.PopupDiagnostics = PopupDiagnostics;
+window.PopupDiagnostics = PopupDiagnostics

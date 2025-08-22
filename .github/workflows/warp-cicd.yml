@@ -2,11 +2,11 @@ name: Warp Web Navigator CI/CD
 
 on:
   push:
-    branches: [ main, develop, staging ]
+    branches: [main, develop, staging]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM
+    - cron: '0 2 * * *' # Daily at 2 AM
   workflow_dispatch:
     inputs:
       environment:
@@ -15,21 +15,21 @@ on:
         default: 'staging'
         type: choice
         options:
-        - development
-        - staging
-        - production
+          - development
+          - staging
+          - production
       test_suite:
         description: 'Test suite to run'
         required: true
         default: 'full'
         type: choice
         options:
-        - basic
-        - forms
-        - interactions
-        - performance
-        - accessibility
-        - full
+          - basic
+          - forms
+          - interactions
+          - performance
+          - accessibility
+          - full
 
 env:
   WARP_API_KEY: ${{ secrets.WARP_API_KEY }}
@@ -135,7 +135,7 @@ jobs:
         run: |
           # Install Warp CLI tools
           curl -fsSL https://api.warp.dev/install.sh | bash
-          
+
           # Configure Warp environment
           warp config set api-key "$WARP_API_KEY"
           warp config set endpoint "$WARP_ENDPOINT"
@@ -148,7 +148,7 @@ jobs:
           cat > load_extension.js << 'EOF'
           const puppeteer = require('puppeteer');
           const path = require('path');
-          
+
           (async () => {
             const browser = await puppeteer.launch({
               headless: false,
@@ -195,7 +195,7 @@ jobs:
             await browser.close();
           })();
           EOF
-          
+
           npm install puppeteer
           node load_extension.js
 
@@ -220,12 +220,12 @@ jobs:
               warp test run --suite=full --output=./test-results/
               ;;
           esac
-          
+
           # Extract test results
           TEST_STATUS=$(cat ./test-results/summary.json | jq -r '.status')
           TESTS_PASSED=$(cat ./test-results/summary.json | jq -r '.passed')
           TESTS_FAILED=$(cat ./test-results/summary.json | jq -r '.failed')
-          
+
           echo "test_status=$TEST_STATUS" >> $GITHUB_OUTPUT
           echo "tests_passed=$TESTS_PASSED" >> $GITHUB_OUTPUT
           echo "tests_failed=$TESTS_FAILED" >> $GITHUB_OUTPUT
@@ -235,12 +235,12 @@ jobs:
         run: |
           # Send test results to AI for analysis
           warp ai analyze --input=./test-results/ --output=./ai-analysis.json
-          
+
           # Extract AI recommendations
           AI_SCORE=$(cat ./ai-analysis.json | jq -r '.score // "N/A"')
           AI_RISK=$(cat ./ai-analysis.json | jq -r '.riskLevel // "unknown"')
           AI_DEPLOYMENT=$(cat ./ai-analysis.json | jq -r '.deploymentRecommendation // "review"')
-          
+
           echo "ai_score=$AI_SCORE" >> $GITHUB_OUTPUT
           echo "ai_risk=$AI_RISK" >> $GITHUB_OUTPUT
           echo "ai_deployment=$AI_DEPLOYMENT" >> $GITHUB_OUTPUT
@@ -274,29 +274,29 @@ jobs:
             const testsFailed = '${{ steps.warp-tests.outputs.tests_failed }}';
             const aiScore = '${{ steps.warp-tests.outputs.ai_score }}';
             const aiRisk = '${{ steps.warp-tests.outputs.ai_risk }}';
-            
+
             const statusIcon = testStatus === 'passed' ? '✅' : '❌';
             const riskColor = aiRisk === 'low' ? '🟢' : aiRisk === 'medium' ? '🟡' : '🔴';
-            
+
             const comment = `## ${statusIcon} Warp Test Results - ${{ matrix.browser }} (${{ matrix.environment }})
-            
+
             ### Test Summary
             - **Status**: ${testStatus}
             - **Passed**: ${testsPassed}
             - **Failed**: ${testsFailed}
             - **Suite**: ${{ matrix.test_suite }}
-            
+
             ### AI Analysis
             - **Score**: ${aiScore}/10
             - **Risk Level**: ${riskColor} ${aiRisk}
             - **Deployment**: ${aiDeployment}
-            
+
             ### Environment Details
             - **Browser**: ${{ matrix.browser }}
             - **Environment**: ${{ matrix.environment }}
             - **Workflow**: ${{ github.workflow }}
             `;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -345,7 +345,7 @@ jobs:
           # Aggregate all test results
           TOTAL_PASSED=0
           TOTAL_FAILED=0
-          
+
           for result_dir in all-test-results/test-results-*/; do
             if [ -f "$result_dir/summary.json" ]; then
               PASSED=$(cat "$result_dir/summary.json" | jq -r '.passed // 0')
@@ -354,13 +354,13 @@ jobs:
               TOTAL_FAILED=$((TOTAL_FAILED + FAILED))
             fi
           done
-          
+
           SUCCESS_RATE=$((TOTAL_PASSED * 100 / (TOTAL_PASSED + TOTAL_FAILED)))
-          
+
           echo "total_passed=$TOTAL_PASSED" >> $GITHUB_OUTPUT
           echo "total_failed=$TOTAL_FAILED" >> $GITHUB_OUTPUT
           echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
-          
+
           # Determine deployment readiness
           if [ $SUCCESS_RATE -ge 95 ] && [ $TOTAL_FAILED -le 2 ]; then
             echo "deployment_ready=true" >> $GITHUB_OUTPUT
@@ -385,7 +385,7 @@ jobs:
           # Deploy to Chrome Web Store
           echo "🚀 Deploying to Chrome Web Store..."
           # Add Chrome Web Store deployment logic here
-          
+
           # Deploy to Microsoft Edge Add-ons
           echo "🚀 Deploying to Microsoft Edge Add-ons..."
           # Add Edge deployment logic here
@@ -455,12 +455,12 @@ jobs:
               repo: context.repo.repo,
               run_id: context.runId,
             });
-            
+
             // Keep only the 10 most recent artifacts
             const sortedArtifacts = artifacts.data.artifacts.sort((a, b) => 
               new Date(b.created_at) - new Date(a.created_at)
             );
-            
+
             for (const artifact of sortedArtifacts.slice(10)) {
               await github.rest.actions.deleteArtifact({
                 owner: context.repo.owner,

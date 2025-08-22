@@ -9,25 +9,25 @@ class WarpAIManager {
           apiKey: null,
           endpoint: 'https://api.openai.com/v1',
           model: 'gpt-4',
-          enabled: false
+          enabled: false,
         },
         anthropic: {
           apiKey: null,
           endpoint: 'https://api.anthropic.com/v1',
           model: 'claude-3-sonnet-20240229',
-          enabled: false
+          enabled: false,
         },
         warp: {
           apiKey: null,
           endpoint: 'https://api.warp.dev/v1',
           model: 'warp-ai-v1',
-          enabled: true
+          enabled: true,
         },
         local: {
           endpoint: 'http://localhost:11434',
           model: 'llama2',
-          enabled: false
-        }
+          enabled: false,
+        },
       },
       defaultProvider: 'warp',
       timeout: 30000,
@@ -36,39 +36,39 @@ class WarpAIManager {
       temperature: 0.3,
       enableStreaming: false,
       enableCaching: true,
-      cacheExpiry: 3600000 // 1 hour
-    };
+      cacheExpiry: 3600000, // 1 hour
+    }
 
-    this.conversationHistory = [];
-    this.cache = new Map();
-    this.activeRequests = new Map();
-    this.eventListeners = new Map();
-    
-    this.init();
+    this.conversationHistory = []
+    this.cache = new Map()
+    this.activeRequests = new Map()
+    this.eventListeners = new Map()
+
+    this.init()
   }
 
   async init() {
-    await this.loadConfig();
-    this.setupEventListeners();
-    this.startHeartbeat();
+    await this.loadConfig()
+    this.setupEventListeners()
+    this.startHeartbeat()
   }
 
   async loadConfig() {
     try {
-      const result = await chrome.storage.sync.get('warpAI');
+      const result = await chrome.storage.sync.get('warpAI')
       if (result.warpAI) {
-        this.config = { ...this.config, ...result.warpAI };
+        this.config = { ...this.config, ...result.warpAI }
       }
     } catch (error) {
-      console.error('Failed to load AI config:', error);
+      console.error('Failed to load AI config:', error)
     }
   }
 
   async saveConfig() {
     try {
-      await chrome.storage.sync.set({ warpAI: this.config });
+      await chrome.storage.sync.set({ warpAI: this.config })
     } catch (error) {
-      console.error('Failed to save AI config:', error);
+      console.error('Failed to save AI config:', error)
     }
   }
 
@@ -76,59 +76,59 @@ class WarpAIManager {
     // Listen for AI requests from other modules
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.type?.startsWith('ai_')) {
-        this.handleAIRequest(message, sender, sendResponse);
-        return true; // Keep message channel open for async response
+        this.handleAIRequest(message, sender, sendResponse)
+        return true // Keep message channel open for async response
       }
-    });
+    })
   }
 
   async handleAIRequest(message, sender, sendResponse) {
     try {
       switch (message.type) {
         case 'ai_analyze_page':
-          const analysis = await this.analyzePage(message.data);
-          sendResponse({ success: true, analysis });
-          break;
+          const analysis = await this.analyzePage(message.data)
+          sendResponse({ success: true, analysis })
+          break
 
         case 'ai_generate_tests':
-          const tests = await this.generateTests(message.data);
-          sendResponse({ success: true, tests });
-          break;
+          const tests = await this.generateTests(message.data)
+          sendResponse({ success: true, tests })
+          break
 
         case 'ai_debug_issue':
-          const solution = await this.debugIssue(message.data);
-          sendResponse({ success: true, solution });
-          break;
+          const solution = await this.debugIssue(message.data)
+          sendResponse({ success: true, solution })
+          break
 
         case 'ai_optimize_selectors':
-          const optimizedSelectors = await this.optimizeSelectors(message.data);
-          sendResponse({ success: true, selectors: optimizedSelectors });
-          break;
+          const optimizedSelectors = await this.optimizeSelectors(message.data)
+          sendResponse({ success: true, selectors: optimizedSelectors })
+          break
 
         case 'ai_chat':
-          const response = await this.handleChatMessage(message.data);
-          sendResponse({ success: true, response });
-          break;
+          const response = await this.handleChatMessage(message.data)
+          sendResponse({ success: true, response })
+          break
 
         default:
-          sendResponse({ success: false, error: 'Unknown AI request type' });
+          sendResponse({ success: false, error: 'Unknown AI request type' })
       }
     } catch (error) {
-      console.error('AI request failed:', error);
-      sendResponse({ success: false, error: error.message });
+      console.error('AI request failed:', error)
+      sendResponse({ success: false, error: error.message })
     }
   }
 
   async analyzePage(pageData) {
-    const prompt = this.buildPageAnalysisPrompt(pageData);
-    
+    const prompt = this.buildPageAnalysisPrompt(pageData)
+
     const response = await this.sendAIRequest({
       prompt,
       context: 'page_analysis',
-      maxTokens: 2000
-    });
+      maxTokens: 2000,
+    })
 
-    return this.parseAnalysisResponse(response);
+    return this.parseAnalysisResponse(response)
   }
 
   buildPageAnalysisPrompt(pageData) {
@@ -157,34 +157,34 @@ Please provide:
 7. Performance considerations
 
 Format response as structured JSON.
-`;
+`
   }
 
   parseAnalysisResponse(response) {
     try {
       // Try to parse as JSON first
-      const parsed = JSON.parse(response.content);
-      return parsed;
+      const parsed = JSON.parse(response.content)
+      return parsed
     } catch (error) {
       // If not JSON, parse structured text
       return {
         summary: response.content,
         score: this.extractScore(response.content),
-        recommendations: this.extractRecommendations(response.content)
-      };
+        recommendations: this.extractRecommendations(response.content),
+      }
     }
   }
 
   async generateTests(testRequest) {
-    const prompt = this.buildTestGenerationPrompt(testRequest);
-    
+    const prompt = this.buildTestGenerationPrompt(testRequest)
+
     const response = await this.sendAIRequest({
       prompt,
       context: 'test_generation',
-      maxTokens: 3000
-    });
+      maxTokens: 3000,
+    })
 
-    return this.parseTestResponse(response);
+    return this.parseTestResponse(response)
   }
 
   buildTestGenerationPrompt(testRequest) {
@@ -231,29 +231,29 @@ Format as JSON array with structure:
     }
   ]
 }
-`;
+`
   }
 
   parseTestResponse(response) {
     try {
-      const parsed = JSON.parse(response.content);
-      return parsed.testCases || parsed;
+      const parsed = JSON.parse(response.content)
+      return parsed.testCases || parsed
     } catch (error) {
       // Parse structured text into test cases
-      return this.extractTestCases(response.content);
+      return this.extractTestCases(response.content)
     }
   }
 
   async debugIssue(issueData) {
-    const prompt = this.buildDebugPrompt(issueData);
-    
+    const prompt = this.buildDebugPrompt(issueData)
+
     const response = await this.sendAIRequest({
       prompt,
       context: 'debugging',
-      maxTokens: 2000
-    });
+      maxTokens: 2000,
+    })
 
-    return this.parseDebugResponse(response);
+    return this.parseDebugResponse(response)
   }
 
   buildDebugPrompt(issueData) {
@@ -278,7 +278,7 @@ Provide:
 5. Code examples if applicable
 
 Focus on practical, actionable solutions.
-`;
+`
   }
 
   parseDebugResponse(response) {
@@ -287,20 +287,20 @@ Focus on practical, actionable solutions.
       solution: this.extractSection(response.content, 'solution'),
       alternatives: this.extractSection(response.content, 'alternative'),
       prevention: this.extractSection(response.content, 'prevention'),
-      codeExamples: this.extractCodeBlocks(response.content)
-    };
+      codeExamples: this.extractCodeBlocks(response.content),
+    }
   }
 
   async optimizeSelectors(selectorsData) {
-    const prompt = this.buildSelectorOptimizationPrompt(selectorsData);
-    
+    const prompt = this.buildSelectorOptimizationPrompt(selectorsData)
+
     const response = await this.sendAIRequest({
       prompt,
       context: 'selector_optimization',
-      maxTokens: 1500
-    });
+      maxTokens: 1500,
+    })
 
-    return this.parseSelectorResponse(response);
+    return this.parseSelectorResponse(response)
   }
 
   buildSelectorOptimizationPrompt(selectorsData) {
@@ -324,53 +324,53 @@ Requirements:
 - Follow best practices
 
 Provide optimized selectors with explanations.
-`;
+`
   }
 
   parseSelectorResponse(response) {
     try {
-      return JSON.parse(response.content);
+      return JSON.parse(response.content)
     } catch (error) {
       return {
         optimizedSelectors: this.extractSelectors(response.content),
-        explanations: this.extractExplanations(response.content)
-      };
+        explanations: this.extractExplanations(response.content),
+      }
     }
   }
 
   async handleChatMessage(chatData) {
-    const prompt = this.buildChatPrompt(chatData);
-    
+    const prompt = this.buildChatPrompt(chatData)
+
     const response = await this.sendAIRequest({
       prompt,
       context: 'chat',
       maxTokens: 1000,
-      temperature: 0.7
-    });
+      temperature: 0.7,
+    })
 
     // Add to conversation history
     this.conversationHistory.push({
       role: 'user',
       content: chatData.message,
-      timestamp: Date.now()
-    });
+      timestamp: Date.now(),
+    })
 
     this.conversationHistory.push({
       role: 'assistant',
       content: response.content,
-      timestamp: Date.now()
-    });
+      timestamp: Date.now(),
+    })
 
     // Keep only last 20 messages
     if (this.conversationHistory.length > 20) {
-      this.conversationHistory = this.conversationHistory.slice(-20);
+      this.conversationHistory = this.conversationHistory.slice(-20)
     }
 
     return {
       message: response.content,
       timestamp: Date.now(),
-      conversationId: chatData.conversationId
-    };
+      conversationId: chatData.conversationId,
+    }
   }
 
   buildChatPrompt(chatData) {
@@ -380,105 +380,107 @@ You help users with browser extension development, testing strategies,
 debugging issues, and optimizing web automation workflows.
 
 Previous conversation:
-${this.conversationHistory.slice(-6).map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+${this.conversationHistory
+  .slice(-6)
+  .map(msg => `${msg.role}: ${msg.content}`)
+  .join('\n')}
 
 Current page context: ${chatData.pageContext?.url || 'Unknown'}
 User question: ${chatData.message}
 
 Provide helpful, specific, and actionable advice.
-`;
+`
 
-    return context;
+    return context
   }
 
   async sendAIRequest(requestData) {
-    const requestId = this.generateRequestId();
-    
+    const requestId = this.generateRequestId()
+
     try {
       // Check cache first
-      const cacheKey = this.generateCacheKey(requestData);
+      const cacheKey = this.generateCacheKey(requestData)
       if (this.config.enableCaching && this.cache.has(cacheKey)) {
-        const cached = this.cache.get(cacheKey);
+        const cached = this.cache.get(cacheKey)
         if (Date.now() - cached.timestamp < this.config.cacheExpiry) {
-          console.log('🔄 Using cached AI response');
-          return cached.response;
+          console.log('🔄 Using cached AI response')
+          return cached.response
         } else {
-          this.cache.delete(cacheKey);
+          this.cache.delete(cacheKey)
         }
       }
 
       // Track active request
       this.activeRequests.set(requestId, {
         startTime: Date.now(),
-        context: requestData.context
-      });
+        context: requestData.context,
+      })
 
-      const provider = this.getActiveProvider();
-      const response = await this.callAIProvider(provider, requestData);
+      const provider = this.getActiveProvider()
+      const response = await this.callAIProvider(provider, requestData)
 
       // Cache successful response
       if (this.config.enableCaching && response.success) {
         this.cache.set(cacheKey, {
           response,
-          timestamp: Date.now()
-        });
+          timestamp: Date.now(),
+        })
       }
 
       // Clean up
-      this.activeRequests.delete(requestId);
+      this.activeRequests.delete(requestId)
 
-      return response;
-
+      return response
     } catch (error) {
-      this.activeRequests.delete(requestId);
-      console.error('AI request failed:', error);
-      
+      this.activeRequests.delete(requestId)
+      console.error('AI request failed:', error)
+
       // Try fallback provider
       if (this.config.defaultProvider !== 'local') {
         try {
-          return await this.callAIProvider('local', requestData);
+          return await this.callAIProvider('local', requestData)
         } catch (fallbackError) {
-          console.error('Fallback AI request also failed:', fallbackError);
+          console.error('Fallback AI request also failed:', fallbackError)
         }
       }
-      
-      throw error;
+
+      throw error
     }
   }
 
   getActiveProvider() {
-    const provider = this.config.providers[this.config.defaultProvider];
+    const provider = this.config.providers[this.config.defaultProvider]
     if (provider?.enabled) {
-      return this.config.defaultProvider;
+      return this.config.defaultProvider
     }
 
     // Find first enabled provider
     for (const [name, config] of Object.entries(this.config.providers)) {
       if (config.enabled) {
-        return name;
+        return name
       }
     }
 
-    throw new Error('No AI providers are enabled');
+    throw new Error('No AI providers are enabled')
   }
 
   async callAIProvider(providerName, requestData) {
-    const provider = this.config.providers[providerName];
+    const provider = this.config.providers[providerName]
     if (!provider) {
-      throw new Error(`Unknown AI provider: ${providerName}`);
+      throw new Error(`Unknown AI provider: ${providerName}`)
     }
 
     switch (providerName) {
       case 'openai':
-        return await this.callOpenAI(provider, requestData);
+        return await this.callOpenAI(provider, requestData)
       case 'anthropic':
-        return await this.callAnthropic(provider, requestData);
+        return await this.callAnthropic(provider, requestData)
       case 'warp':
-        return await this.callWarpAI(provider, requestData);
+        return await this.callWarpAI(provider, requestData)
       case 'local':
-        return await this.callLocalAI(provider, requestData);
+        return await this.callLocalAI(provider, requestData)
       default:
-        throw new Error(`Unsupported AI provider: ${providerName}`);
+        throw new Error(`Unsupported AI provider: ${providerName}`)
     }
   }
 
@@ -486,103 +488,103 @@ Provide helpful, specific, and actionable advice.
     const response = await fetch(`${provider.endpoint}/chat/completions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${provider.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${provider.apiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: provider.model,
         messages: [
           {
             role: 'system',
-            content: 'You are Warp AI, an expert assistant for web automation and testing.'
+            content: 'You are Warp AI, an expert assistant for web automation and testing.',
           },
           {
             role: 'user',
-            content: requestData.prompt
-          }
+            content: requestData.prompt,
+          },
         ],
         max_tokens: requestData.maxTokens || this.config.maxTokens,
-        temperature: requestData.temperature || this.config.temperature
-      })
-    });
+        temperature: requestData.temperature || this.config.temperature,
+      }),
+    })
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`)
     }
 
-    const data = await response.json();
+    const data = await response.json()
     return {
       success: true,
       content: data.choices[0].message.content,
       provider: 'openai',
       model: provider.model,
-      usage: data.usage
-    };
+      usage: data.usage,
+    }
   }
 
   async callAnthropic(provider, requestData) {
     const response = await fetch(`${provider.endpoint}/messages`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${provider.apiKey}`,
+        Authorization: `Bearer ${provider.apiKey}`,
         'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
         model: provider.model,
         messages: [
           {
             role: 'user',
-            content: requestData.prompt
-          }
+            content: requestData.prompt,
+          },
         ],
         max_tokens: requestData.maxTokens || this.config.maxTokens,
-        temperature: requestData.temperature || this.config.temperature
-      })
-    });
+        temperature: requestData.temperature || this.config.temperature,
+      }),
+    })
 
     if (!response.ok) {
-      throw new Error(`Anthropic API error: ${response.status} ${response.statusText}`);
+      throw new Error(`Anthropic API error: ${response.status} ${response.statusText}`)
     }
 
-    const data = await response.json();
+    const data = await response.json()
     return {
       success: true,
       content: data.content[0].text,
       provider: 'anthropic',
       model: provider.model,
-      usage: data.usage
-    };
+      usage: data.usage,
+    }
   }
 
   async callWarpAI(provider, requestData) {
     const response = await fetch(`${provider.endpoint}/chat`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${provider.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${provider.apiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         message: requestData.prompt,
         context: requestData.context,
         model: provider.model,
         maxTokens: requestData.maxTokens || this.config.maxTokens,
-        temperature: requestData.temperature || this.config.temperature
-      })
-    });
+        temperature: requestData.temperature || this.config.temperature,
+      }),
+    })
 
     if (!response.ok) {
-      throw new Error(`Warp AI error: ${response.status} ${response.statusText}`);
+      throw new Error(`Warp AI error: ${response.status} ${response.statusText}`)
     }
 
-    const data = await response.json();
+    const data = await response.json()
     return {
       success: true,
       content: data.response || data.content,
       provider: 'warp',
       model: provider.model,
-      usage: data.usage
-    };
+      usage: data.usage,
+    }
   }
 
   async callLocalAI(provider, requestData) {
@@ -590,44 +592,45 @@ Provide helpful, specific, and actionable advice.
       const response = await fetch(`${provider.endpoint}/api/generate`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           model: provider.model,
           prompt: requestData.prompt,
           options: {
             temperature: requestData.temperature || this.config.temperature,
-            num_predict: requestData.maxTokens || this.config.maxTokens
+            num_predict: requestData.maxTokens || this.config.maxTokens,
           },
-          stream: false
-        })
-      });
+          stream: false,
+        }),
+      })
 
       if (!response.ok) {
-        throw new Error(`Local AI error: ${response.status} ${response.statusText}`);
+        throw new Error(`Local AI error: ${response.status} ${response.statusText}`)
       }
 
-      const data = await response.json();
+      const data = await response.json()
       return {
         success: true,
         content: data.response,
         provider: 'local',
-        model: provider.model
-      };
+        model: provider.model,
+      }
     } catch (error) {
       // If local AI is not available, provide a fallback response
       return {
         success: true,
-        content: 'Local AI is not available. Please configure a cloud AI provider for full functionality.',
+        content:
+          'Local AI is not available. Please configure a cloud AI provider for full functionality.',
         provider: 'fallback',
-        model: 'none'
-      };
+        model: 'none',
+      }
     }
   }
 
   // Utility methods
   generateRequestId() {
-    return 'ai-req-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    return 'ai-req-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9)
   }
 
   generateCacheKey(requestData) {
@@ -635,79 +638,84 @@ Provide helpful, specific, and actionable advice.
       prompt: requestData.prompt?.substring(0, 100),
       context: requestData.context,
       maxTokens: requestData.maxTokens,
-      temperature: requestData.temperature
-    };
-    return btoa(JSON.stringify(keyData)).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
+      temperature: requestData.temperature,
+    }
+    return btoa(JSON.stringify(keyData))
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .substring(0, 32)
   }
 
   extractScore(text) {
-    const match = text.match(/(?:score|rating|assessment).*?([0-9]{1,2})/i);
-    return match ? parseInt(match[1]) : null;
+    const match = text.match(/(?:score|rating|assessment).*?([0-9]{1,2})/i)
+    return match ? parseInt(match[1]) : null
   }
 
   extractRecommendations(text) {
-    const recommendations = [];
-    const lines = text.split('\n');
-    let inRecommendations = false;
+    const recommendations = []
+    const lines = text.split('\n')
+    let inRecommendations = false
 
     for (const line of lines) {
       if (line.toLowerCase().includes('recommendation') || line.toLowerCase().includes('suggest')) {
-        inRecommendations = true;
-        continue;
+        inRecommendations = true
+        continue
       }
-      
+
       if (inRecommendations && line.trim()) {
-        const cleaned = line.replace(/^\d+\.\s*|-\s*|\*\s*/, '').trim();
+        const cleaned = line.replace(/^\d+\.\s*|-\s*|\*\s*/, '').trim()
         if (cleaned.length > 10) {
-          recommendations.push(cleaned);
+          recommendations.push(cleaned)
         }
       }
     }
 
-    return recommendations.slice(0, 10); // Limit to 10 recommendations
+    return recommendations.slice(0, 10) // Limit to 10 recommendations
   }
 
   extractSection(text, sectionName) {
-    const regex = new RegExp(`${sectionName}[:\\s]+(.*?)(?=\\n\\n|$)`, 'is');
-    const match = text.match(regex);
-    return match ? match[1].trim() : null;
+    const regex = new RegExp(`${sectionName}[:\\s]+(.*?)(?=\\n\\n|$)`, 'is')
+    const match = text.match(regex)
+    return match ? match[1].trim() : null
   }
 
   extractCodeBlocks(text) {
-    const codeBlocks = [];
-    const matches = text.matchAll(/```(\w+)?\n(.*?)```/gs);
-    
+    const codeBlocks = []
+    const matches = text.matchAll(/```(\w+)?\n(.*?)```/gs)
+
     for (const match of matches) {
       codeBlocks.push({
         language: match[1] || 'javascript',
-        code: match[2].trim()
-      });
+        code: match[2].trim(),
+      })
     }
 
-    return codeBlocks;
+    return codeBlocks
   }
 
   extractSelectors(text) {
-    const selectors = [];
-    const selectorRegex = /['"`]([#.]?[a-zA-Z0-9\-_\[\]="':.\s>+~]+)['"`]/g;
-    const matches = text.matchAll(selectorRegex);
-    
+    const selectors = []
+    const selectorRegex = /['"`]([#.]?[a-zA-Z0-9\-_\[\]="':.\s>+~]+)['"`]/g
+    const matches = text.matchAll(selectorRegex)
+
     for (const match of matches) {
-      const selector = match[1];
-      if (selector.length > 2 && (selector.startsWith('.') || selector.startsWith('#') || selector.includes('['))) {
-        selectors.push(selector);
+      const selector = match[1]
+      if (
+        selector.length > 2 &&
+        (selector.startsWith('.') || selector.startsWith('#') || selector.includes('['))
+      ) {
+        selectors.push(selector)
       }
     }
 
-    return [...new Set(selectors)]; // Remove duplicates
+    return [...new Set(selectors)] // Remove duplicates
   }
 
   extractTestCases(text) {
-    const testCases = [];
-    const testRegex = /test[^\n]*:(.*?)(?=test[^\n]*:|$)/gis;
-    const matches = text.matchAll(testRegex);
-    
-    let testId = 1;
+    const testCases = []
+    const testRegex = /test[^\n]*:(.*?)(?=test[^\n]*:|$)/gis
+    const matches = text.matchAll(testRegex)
+
+    let testId = 1
     for (const match of matches) {
       testCases.push({
         id: `extracted_test_${testId++}`,
@@ -716,125 +724,126 @@ Provide helpful, specific, and actionable advice.
         priority: 'medium',
         type: 'functional',
         steps: this.extractSteps(match[1]),
-        assertions: []
-      });
+        assertions: [],
+      })
     }
 
-    return testCases;
+    return testCases
   }
 
   extractSteps(text) {
-    const steps = [];
-    const stepRegex = /(\d+\.|\-|\*)\s*([^.\n]+)/g;
-    const matches = text.matchAll(stepRegex);
-    
+    const steps = []
+    const stepRegex = /(\d+\.|\-|\*)\s*([^.\n]+)/g
+    const matches = text.matchAll(stepRegex)
+
     for (const match of matches) {
-      const stepText = match[2].trim();
+      const stepText = match[2].trim()
       steps.push({
         action: this.inferAction(stepText),
         target: this.inferTarget(stepText),
         value: this.inferValue(stepText),
-        expected: this.inferExpected(stepText)
-      });
+        expected: this.inferExpected(stepText),
+      })
     }
 
-    return steps;
+    return steps
   }
 
   inferAction(stepText) {
-    const lowerText = stepText.toLowerCase();
-    if (lowerText.includes('click')) return 'click';
-    if (lowerText.includes('type') || lowerText.includes('enter') || lowerText.includes('input')) return 'input';
-    if (lowerText.includes('wait')) return 'wait';
-    if (lowerText.includes('verify') || lowerText.includes('check')) return 'verify';
-    return 'action';
+    const lowerText = stepText.toLowerCase()
+    if (lowerText.includes('click')) return 'click'
+    if (lowerText.includes('type') || lowerText.includes('enter') || lowerText.includes('input'))
+      return 'input'
+    if (lowerText.includes('wait')) return 'wait'
+    if (lowerText.includes('verify') || lowerText.includes('check')) return 'verify'
+    return 'action'
   }
 
   inferTarget(stepText) {
     // Try to extract CSS selectors or element descriptions
-    const selectorMatch = stepText.match(/['"`]([#.]?[a-zA-Z0-9\-_\[\]="':.\s]+)['"`]/);
-    if (selectorMatch) return selectorMatch[1];
-    
+    const selectorMatch = stepText.match(/['"`]([#.]?[a-zA-Z0-9\-_\[\]="':.\s]+)['"`]/)
+    if (selectorMatch) return selectorMatch[1]
+
     // Look for common element descriptions
-    if (stepText.includes('button')) return 'button';
-    if (stepText.includes('input')) return 'input';
-    if (stepText.includes('form')) return 'form';
-    
-    return 'element';
+    if (stepText.includes('button')) return 'button'
+    if (stepText.includes('input')) return 'input'
+    if (stepText.includes('form')) return 'form'
+
+    return 'element'
   }
 
   inferValue(stepText) {
-    const valueMatch = stepText.match(/(?:with|value|text)?\s*['"`]([^'"`]+)['"`]/);
-    return valueMatch ? valueMatch[1] : null;
+    const valueMatch = stepText.match(/(?:with|value|text)?\s*['"`]([^'"`]+)['"`]/)
+    return valueMatch ? valueMatch[1] : null
   }
 
   inferExpected(stepText) {
-    const expectMatch = stepText.match(/(?:should|expect|verify).*?['"`]([^'"`]+)['"`]/);
-    return expectMatch ? expectMatch[1] : null;
+    const expectMatch = stepText.match(/(?:should|expect|verify).*?['"`]([^'"`]+)['"`]/)
+    return expectMatch ? expectMatch[1] : null
   }
 
   extractExplanations(text) {
-    const explanations = [];
-    const lines = text.split('\n');
-    
+    const explanations = []
+    const lines = text.split('\n')
+
     for (const line of lines) {
       if (line.includes('because') || line.includes('reason') || line.includes('explanation')) {
-        explanations.push(line.trim());
+        explanations.push(line.trim())
       }
     }
 
-    return explanations;
+    return explanations
   }
 
   startHeartbeat() {
     // Periodic cleanup and health checks
     setInterval(() => {
-      this.cleanupCache();
-      this.cleanupActiveRequests();
-    }, 300000); // 5 minutes
+      this.cleanupCache()
+      this.cleanupActiveRequests()
+    }, 300000) // 5 minutes
   }
 
   cleanupCache() {
-    const now = Date.now();
+    const now = Date.now()
     for (const [key, cached] of this.cache.entries()) {
       if (now - cached.timestamp > this.config.cacheExpiry) {
-        this.cache.delete(key);
+        this.cache.delete(key)
       }
     }
   }
 
   cleanupActiveRequests() {
-    const now = Date.now();
+    const now = Date.now()
     for (const [id, request] of this.activeRequests.entries()) {
       if (now - request.startTime > this.config.timeout) {
-        this.activeRequests.delete(id);
-        console.warn(`AI request ${id} timed out and was cleaned up`);
+        this.activeRequests.delete(id)
+        console.warn(`AI request ${id} timed out and was cleaned up`)
       }
     }
   }
 
   // Configuration methods
   async updateConfig(newConfig) {
-    this.config = { ...this.config, ...newConfig };
-    await this.saveConfig();
+    this.config = { ...this.config, ...newConfig }
+    await this.saveConfig()
   }
 
   async setProvider(providerName, config) {
     if (!this.config.providers[providerName]) {
-      throw new Error(`Unknown provider: ${providerName}`);
+      throw new Error(`Unknown provider: ${providerName}`)
     }
-    
-    this.config.providers[providerName] = { ...this.config.providers[providerName], ...config };
-    await this.saveConfig();
+
+    this.config.providers[providerName] = { ...this.config.providers[providerName], ...config }
+    await this.saveConfig()
   }
 
   async setDefaultProvider(providerName) {
     if (!this.config.providers[providerName]) {
-      throw new Error(`Unknown provider: ${providerName}`);
+      throw new Error(`Unknown provider: ${providerName}`)
     }
-    
-    this.config.defaultProvider = providerName;
-    await this.saveConfig();
+
+    this.config.defaultProvider = providerName
+    await this.saveConfig()
   }
 
   // Public API methods
@@ -842,28 +851,28 @@ Provide helpful, specific, and actionable advice.
     return await this.handleChatMessage({
       message: question,
       pageContext: context,
-      conversationId: context.conversationId || 'default'
-    });
+      conversationId: context.conversationId || 'default',
+    })
   }
 
   async analyzeCurrentPage() {
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    const tab = tabs[0];
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
+    const tab = tabs[0]
 
     if (!tab) {
-      throw new Error('No active tab found');
+      throw new Error('No active tab found')
     }
 
     // Get page data from content script
     const response = await chrome.tabs.sendMessage(tab.id, {
-      action: 'get_page_analysis_data'
-    });
+      action: 'get_page_analysis_data',
+    })
 
     if (!response?.success) {
-      throw new Error('Failed to get page data');
+      throw new Error('Failed to get page data')
     }
 
-    return await this.analyzePage(response.data);
+    return await this.analyzePage(response.data)
   }
 
   getStatus() {
@@ -874,20 +883,20 @@ Provide helpful, specific, and actionable advice.
         .map(([name]) => name),
       activeRequests: this.activeRequests.size,
       cacheSize: this.cache.size,
-      conversationLength: this.conversationHistory.length
-    };
+      conversationLength: this.conversationHistory.length,
+    }
   }
 
   clearCache() {
-    this.cache.clear();
-    console.log('AI cache cleared');
+    this.cache.clear()
+    console.log('AI cache cleared')
   }
 
   clearConversation() {
-    this.conversationHistory = [];
-    console.log('Conversation history cleared');
+    this.conversationHistory = []
+    console.log('Conversation history cleared')
   }
 }
 
 // Export for use
-window.WarpAIManager = WarpAIManager;
+window.WarpAIManager = WarpAIManager
